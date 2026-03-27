@@ -1,0 +1,48 @@
+# ──────────────────────────────────────────
+# Python / Backend
+# ──────────────────────────────────────────
+backend/venv/
+backend/.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Alembic (keep migrations, ignore cache)
+backend/alembic/__pycache__/
+
+# Environment variables — NEVER commit
+.env
+*.env
+
+# ──────────────────────────────────────────
+# Flutter / Dart / Frontend
+# ──────────────────────────────────────────
+frontend/.dart_tool/
+frontend/.packages
+frontend/build/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+*.g.dart
+*.freezed.dart
+
+# iOS / Android (not needed for web-only)
+frontend/android/
+frontend/ios/
+frontend/macos/
+frontend/linux/
+frontend/windows/
+
+# ──────────────────────────────────────────
+# IDE & OS
+# ──────────────────────────────────────────
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
