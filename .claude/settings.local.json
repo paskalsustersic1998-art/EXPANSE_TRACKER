@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find '/c/Users/paska/Projects\\(No OneDrive\\)/EXPANSE_TRACKER' -type f)",
+      "Bash(find '/c/Users/paska/Projects\\(No OneDrive\\)/EXPANSE_TRACKER' -type d)",
+      "Bash(find /c/Users/paska/Projects'\\(No OneDrive\\)'/EXPANSE_TRACKER -maxdepth 5)",
+      "Bash(find /c/Users/paska/Projects* -type d)",
+      "Bash(ls -lah /c/Users/paska/Projects*/)",
+      "Bash(flutter create:*)",
+      "Bash(flutter pub:*)"
+    ]
+  }
+}
