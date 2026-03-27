@@ -7,11 +7,13 @@ void main() {
   runApp(const ProviderScope(child: App()));
 }
 
-class App extends StatelessWidget {
+class App extends ConsumerWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+
     return MaterialApp.router(
       title: 'Expanse Tracker',
       debugShowCheckedModeBanner: false,
@@ -19,7 +21,7 @@ class App extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
-      routerConfig: appRouter,
+      routerConfig: router,
     );
   }
 }

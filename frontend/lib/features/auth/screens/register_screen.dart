@@ -4,14 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import '../providers/auth_provider.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends ConsumerStatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
@@ -28,7 +28,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     final ok = await ref
         .read(authProvider.notifier)
-        .login(_emailCtrl.text.trim(), _passwordCtrl.text);
+        .register(_emailCtrl.text.trim(), _passwordCtrl.text);
     if (ok && mounted) context.go('/trips');
   }
 
@@ -49,13 +49,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Expanse Tracker',
+                    'Create Account',
                     style: Theme.of(context).textTheme.headlineMedium,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Sign in to your account',
+                    'Join Expanse Tracker',
                     style: Theme.of(context).textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),
@@ -104,12 +104,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Sign In'),
+                        : const Text('Register'),
                   ),
                   const SizedBox(height: 16),
                   TextButton(
-                    onPressed: () => context.go('/register'),
-                    child: const Text("Don't have an account? Register"),
+                    onPressed: () => context.go('/login'),
+                    child: const Text('Already have an account? Sign in'),
                   ),
                 ],
               ),
