@@ -8,6 +8,9 @@ from app.core.database import Base
 
 # Import all models so Alembic can detect them
 import app.models.user  # noqa: F401
+import app.models.trip  # noqa: F401
+import app.models.expense  # noqa: F401
+import app.models.settlement  # noqa: F401
 
 config = context.config
 
