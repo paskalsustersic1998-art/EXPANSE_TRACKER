@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/admin/screens/admin_screen.dart';
 import '../features/auth/providers/auth_provider.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
+import '../features/expenses/screens/trip_detail_screen.dart';
 import '../features/trips/screens/trips_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -21,6 +23,13 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (!isLoggedIn && !onAuthPage) return '/login';
       if (isLoggedIn && onAuthPage) return '/trips';
+
+      // Protect /admin — non-admins get bounced to /trips
+      if (state.matchedLocation == '/admin' &&
+          authState.user?.role != 'admin') {
+        return '/trips';
+      }
+
       return null;
     },
     routes: [
@@ -35,6 +44,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/trips',
         builder: (context, state) => const TripsScreen(),
+      ),
+      GoRoute(
+        path: '/trips/:id',
+        builder: (context, state) {
+          final tripId = int.parse(state.pathParameters['id']!);
+          final tripName = state.extra as String? ?? 'Trip';
+          return TripDetailScreen(tripId: tripId, tripName: tripName);
+        },
+      ),
+      GoRoute(
+        path: '/admin',
+        builder: (context, state) => const AdminScreen(),
       ),
     ],
   );
