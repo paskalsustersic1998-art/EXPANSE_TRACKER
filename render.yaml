@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: expanse-tracker-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: expanse-tracker-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 30
+      - key: CORS_ORIGINS
+        value: https://expanse-tracker-web.onrender.com
+
+  - type: web
+    name: expanse-tracker-web
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    dockerBuildArgs:
+      API_URL: https://expanse-tracker-api.onrender.com
+
+databases:
+  - name: expanse-tracker-db
+    databaseName: expanse_tracker
+    user: expanse_user
+    plan: free

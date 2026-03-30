@@ -37,7 +37,19 @@ class AdminScreen extends ConsumerWidget {
     }
 
     if (state.users.isEmpty) {
-      return const Center(child: Text('No users found.'));
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.group_outlined,
+                size: 64,
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4)),
+            const SizedBox(height: 16),
+            Text('No users found.',
+                style: Theme.of(context).textTheme.titleMedium),
+          ],
+        ),
+      );
     }
 
     return RefreshIndicator(

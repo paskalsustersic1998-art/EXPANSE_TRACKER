@@ -3,7 +3,9 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../models/trip_model.dart';
 import '../providers/trips_provider.dart';
 
 class TripsScreen extends ConsumerWidget {
@@ -14,7 +16,6 @@ class TripsScreen extends ConsumerWidget {
     final tripsState = ref.watch(tripsProvider);
     final currentUser = ref.watch(authProvider).user;
 
-    // Show error as snackbar when it appears
     ref.listen<TripsState>(tripsProvider, (_, next) {
       if (next.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -40,7 +41,7 @@ class TripsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: _buildBody(context, tripsState),
+      body: _buildBody(context, ref, tripsState),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCreateDialog(context, ref),
         child: const Icon(Icons.add),
@@ -48,48 +49,44 @@ class TripsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, TripsState state) {
+  Widget _buildBody(BuildContext context, WidgetRef ref, TripsState state) {
     if (state.isLoading && state.trips.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (state.trips.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.luggage, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text('No trips yet. Tap + to create one.'),
+            Icon(
+              Icons.flight_takeoff,
+              size: 72,
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No trips yet',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Tap + to plan your first adventure.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
         ),
       );
     }
 
     return RefreshIndicator(
-      onRefresh: () async {},
+      onRefresh: () => ref.read(tripsProvider.notifier).loadTrips(),
       child: ListView.separated(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
         itemCount: state.trips.length,
-        separatorBuilder: (_, _) => const SizedBox(height: 8),
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
-          final trip = state.trips[index];
-          return Card(
-            child: ListTile(
-              onTap: () => context.push('/trips/${trip.id}', extra: trip.name),
-              leading: const Icon(Icons.luggage),
-              title: Text(trip.name),
-              subtitle: trip.description != null
-                  ? Text(trip.description!, maxLines: 1, overflow: TextOverflow.ellipsis)
-                  : Text(
-                      '${trip.participants.length} participant${trip.participants.length == 1 ? '' : 's'}',
-                    ),
-              trailing: Text(
-                '${trip.createdAt.year}-${trip.createdAt.month.toString().padLeft(2, '0')}-${trip.createdAt.day.toString().padLeft(2, '0')}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-          );
+          return _TripCard(trip: state.trips[index]);
         },
       ),
     );
@@ -111,10 +108,7 @@ class TripsScreen extends ConsumerWidget {
             children: [
               TextFormField(
                 controller: nameCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Trip name',
-                  border: OutlineInputBorder(),
-                ),
+                decoration: const InputDecoration(labelText: 'Trip name'),
                 autofocus: true,
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Name is required' : null,
@@ -122,10 +116,8 @@ class TripsScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               TextFormField(
                 controller: descCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Description (optional)',
-                  border: OutlineInputBorder(),
-                ),
+                decoration:
+                    const InputDecoration(labelText: 'Description (optional)'),
                 maxLines: 2,
               ),
             ],
@@ -152,6 +144,67 @@ class TripsScreen extends ConsumerWidget {
             child: const Text('Create'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TripCard extends ConsumerWidget {
+  const _TripCard({required this.trip});
+
+  final TripModel trip;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = AppTheme.tripColors[trip.id % AppTheme.tripColors.length];
+    final dateStr =
+        '${trip.createdAt.year}-${trip.createdAt.month.toString().padLeft(2, '0')}-${trip.createdAt.day.toString().padLeft(2, '0')}';
+    final participantCount = trip.participants.length;
+    final subtitle = trip.description ??
+        '$participantCount participant${participantCount == 1 ? '' : 's'}';
+
+    return GestureDetector(
+      onTap: () => GoRouter.of(context).push('/trips/${trip.id}', extra: trip.name),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          color: color,
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                trip.name,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      subtitle,
+                      style: const TextStyle(color: Colors.white70, fontSize: 13),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Text(
+                    dateStr,
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.chevron_right, color: Colors.white70, size: 16),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

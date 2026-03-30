@@ -42,9 +42,18 @@ class TripDetailScreen extends ConsumerWidget {
     final matches = tripsState.trips.where((t) => t.id == tripId);
     final trip = matches.isEmpty ? null : matches.first;
 
+    final isWorking = (state.isLoading && state.balances.isNotEmpty) ||
+        tripsState.isLoading;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(trip?.name ?? tripName),
+        bottom: isWorking
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(4),
+                child: LinearProgressIndicator(),
+              )
+            : null,
         actions: [
           if (trip != null)
             IconButton(
@@ -81,7 +90,11 @@ class TripDetailScreen extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Participants', style: Theme.of(context).textTheme.titleMedium),
+                Text('Participants',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold)),
                 TextButton.icon(
                   onPressed: () => _showAddParticipantDialog(context, ref),
                   icon: const Icon(Icons.person_add, size: 18),
@@ -112,7 +125,11 @@ class TripDetailScreen extends ConsumerWidget {
         if (state.expenses.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Text('Expenses', style: Theme.of(context).textTheme.titleMedium),
+            child: Text('Expenses',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
           ),
           for (final expense in state.expenses)
             Padding(
@@ -120,44 +137,59 @@ class TripDetailScreen extends ConsumerWidget {
               child: Opacity(
                 opacity: expense.isSettled ? 0.5 : 1.0,
                 child: Card(
-                  child: ListTile(
-                    leading: Icon(
-                      expense.isSettled ? Icons.check_circle : Icons.receipt,
-                      color: expense.isSettled ? Colors.green : null,
-                    ),
-                    title: Text(
-                      expense.description,
-                      style: expense.isSettled
-                          ? const TextStyle(decoration: TextDecoration.lineThrough)
-                          : null,
-                    ),
-                    subtitle: Text('\$${expense.amount.toStringAsFixed(2)}'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
+                  clipBehavior: Clip.antiAlias,
+                  child: IntrinsicHeight(
+                    child: Row(
                       children: [
-                        if (!expense.isSettled)
-                          IconButton(
-                            icon: const Icon(Icons.edit_outlined, color: Colors.blue),
-                            tooltip: 'Edit expense',
-                            onPressed: trip == null
-                                ? null
-                                : () => _showEditExpenseDialog(context, ref, trip, expense),
-                          ),
-                        IconButton(
-                          icon: Icon(
-                            expense.isSettled
-                                ? Icons.check_circle
-                                : Icons.check_circle_outline,
-                            color: Colors.green,
-                          ),
-                          tooltip: expense.isSettled ? 'Already settled' : 'Settle this expense',
-                          onPressed: expense.isSettled
-                              ? null
-                              : () => _confirmSettleExpense(context, ref, expense),
+                        Container(
+                          width: 4,
+                          color: expense.isSettled
+                              ? Colors.green.shade400
+                              : Theme.of(context).colorScheme.primary,
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline, color: Colors.red),
-                          onPressed: () => _confirmDeleteExpense(context, ref, expense),
+                        Expanded(
+                          child: ListTile(
+                            leading: Icon(
+                              expense.isSettled ? Icons.check_circle : Icons.receipt,
+                              color: expense.isSettled ? Colors.green : null,
+                            ),
+                            title: Text(
+                              expense.description,
+                              style: expense.isSettled
+                                  ? const TextStyle(decoration: TextDecoration.lineThrough)
+                                  : null,
+                            ),
+                            subtitle: Text('\$${expense.amount.toStringAsFixed(2)}'),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (!expense.isSettled)
+                                  IconButton(
+                                    icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+                                    tooltip: 'Edit expense',
+                                    onPressed: trip == null
+                                        ? null
+                                        : () => _showEditExpenseDialog(context, ref, trip, expense),
+                                  ),
+                                IconButton(
+                                  icon: Icon(
+                                    expense.isSettled
+                                        ? Icons.check_circle
+                                        : Icons.check_circle_outline,
+                                    color: Colors.green,
+                                  ),
+                                  tooltip: expense.isSettled ? 'Already settled' : 'Settle this expense',
+                                  onPressed: expense.isSettled
+                                      ? null
+                                      : () => _confirmSettleExpense(context, ref, expense),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                  onPressed: () => _confirmDeleteExpense(context, ref, expense),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -168,15 +200,23 @@ class TripDetailScreen extends ConsumerWidget {
           const Divider(height: 24),
         ],
         if (state.expenses.isEmpty)
-          const Center(
+          Center(
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 48),
+              padding: const EdgeInsets.symmetric(vertical: 48),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.receipt_long, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Text('No expenses yet. Tap + to add one.'),
+                  Icon(
+                    Icons.receipt_long,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                  ),
+                  const SizedBox(height: 16),
+                  Text('No expenses yet.',
+                      style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 4),
+                  Text('Tap + to add the first one.',
+                      style: Theme.of(context).textTheme.bodySmall),
                 ],
               ),
             ),
@@ -187,7 +227,11 @@ class TripDetailScreen extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Balances', style: Theme.of(context).textTheme.titleMedium),
+                Text('Balances',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold)),
                 if (state.balances.any((b) => b.net != 0))
                   TextButton.icon(
                     onPressed: () => _showSettleUpDialog(context, ref),
@@ -221,7 +265,11 @@ class TripDetailScreen extends ConsumerWidget {
           const Divider(height: 24),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Text('Past Settlements', style: Theme.of(context).textTheme.titleMedium),
+            child: Text('Past Settlements',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
           ),
           for (final settlement in state.settlements)
             Padding(
