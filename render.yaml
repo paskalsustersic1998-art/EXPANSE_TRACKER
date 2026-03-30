@@ -28,4 +28,3 @@ databases:
   - name: expanse-tracker-db
     databaseName: expanse_tracker
     user: expanse_user
-    plan: starter
