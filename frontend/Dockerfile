@@ -3,7 +3,7 @@ FROM ghcr.io/cirruslabs/flutter:stable AS builder
 
 WORKDIR /app
 
-ARG API_URL=https://expanse-tracker-api-1er.onrender.com
+ARG API_URL=https://expanse-tracker-api-11er.onrender.com
 
 COPY pubspec.yaml pubspec.lock ./
 RUN flutter pub get
