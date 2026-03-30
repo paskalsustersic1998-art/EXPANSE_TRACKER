@@ -23,8 +23,6 @@ services:
     runtime: docker
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend
-    dockerBuildArgs:
-      API_URL: https://expanse-tracker-api.onrender.com
 
 databases:
   - name: expanse-tracker-db

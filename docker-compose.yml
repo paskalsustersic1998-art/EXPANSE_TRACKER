@@ -31,7 +31,10 @@ services:
         condition: service_healthy
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        API_URL: http://localhost:8000
     restart: unless-stopped
     ports:
       - "80:80"
